@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Python Syntax Memorizer (Prototype)</title>
+  <style>
+    :root{
+      --bg: #1f1f1f;
+
+      /* default (masked) */
+      --mask: #7a7a7a;
+
+      /* hint (shows the real code lightly) */
+      --hint: #9a9a9a;
+
+      /* correct */
+      --correct: #eaeaea;
+
+      /* wrong glow */
+      --wrongGlow1: rgba(255, 70, 70, 0.80);
+      --wrongGlow2: rgba(255, 70, 70, 0.55);
+    }
+
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      background: var(--bg);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    .wrap{
+      width:min(1100px, 92vw);
+      padding: 26px 18px;
+    }
+
+    .question{
+      color:#d8d8d8;
+      font-size: 16px;
+      margin-bottom: 14px;
+      user-select:none;
+    }
+
+    .hintline{
+      color:#8a8a8a;
+      font-size: 13px;
+      margin-bottom: 12px;
+      user-select:none;
+    }
+
+    .code{
+      font-size: 22px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+      outline: none;
+      user-select:none;
+      caret-color: transparent;
+    }
+
+    /* each displayed character */
+    .ch{
+      color: var(--mask);
+      transition: color 140ms ease, text-shadow 140ms ease, filter 140ms ease;
+    }
+
+    /* hint (only for untyped positions) */
+    .hintChar{
+      color: var(--hint);
+      opacity: 0.55;
+    }
+
+    .correct{
+      color: var(--correct);
+      opacity: 1;
+      text-shadow: none;
+      filter: none;
+    }
+
+    .wrong{
+      color: #ffffff;
+      text-shadow:
+        0 0 4px var(--wrongGlow1),
+        0 0 12px var(--wrongGlow2);
+      filter: saturate(1.1);
+      opacity: 1;
+    }
+
+    @keyframes wrongPulse {
+      0%{
+        text-shadow:
+          0 0 3px rgba(255,70,70,0.40),
+          0 0 8px rgba(255,70,70,0.30);
+      }
+      50%{
+        text-shadow:
+          0 0 7px rgba(255,70,70,0.98),
+          0 0 20px rgba(255,70,70,0.78);
+      }
+      100%{
+        text-shadow:
+          0 0 4px rgba(255,70,70,0.80),
+          0 0 12px rgba(255,70,70,0.55);
+      }
+    }
+    .wrong.pulse{ animation: wrongPulse 240ms ease-in-out 1; }
+
+    .status{
+      margin-top: 14px;
+      color:#8a8a8a;
+      font-size: 13px;
+      user-select:none;
+      display:flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    kbd{
+      border:1px solid #555;
+      border-bottom-width:2px;
+      border-radius:6px;
+      padding:2px 6px;
+      color:#cfcfcf;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="question" class="question"></div>
+    <div class="hintline">
+      Type the answer. <kbd>Tab</kbd> toggles hint (shows light-gray code). <kbd>Backspace</kbd> deletes. <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>R</kbd> resets.
+    </div>
+    <div id="code" class="code" tabindex="0" aria-label="Typing area"></div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    // ------------------ EDIT THESE TWO LINES ------------------
+    const QUESTION_TEXT = "Write a Python function that returns True if n is prime, else False.";
+    const ANSWER_CODE = `def is_prime(n: int) -> bool:
+    if n < 2:
+        return False
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+`;
+    // ---------------------------------------------------------
+
+    const questionEl = document.getElementById("question");
+    const codeEl = document.getElementById("code");
+    const statusEl = document.getElementById("status");
+
+    questionEl.textContent = "Question: " + QUESTION_TEXT;
+
+    // Typed characters array: each index stores what user typed, or undefined if not typed yet.
+    let typed = [];
+    let cursorIndex = 0;
+    let hintMode = false;      // toggled by Tab
+    let lastWrongIndex = -1;
+
+    // Visual masking rules:
+    // - Newlines show as real line breaks.
+    // - Spaces show as "·" when masked (so you can SEE indentation), but the expected char is still " ".
+    // - Other characters show as "_" when masked.
+    function maskedCharFor(expectedChar) {
+      if (expectedChar === "\n") return "\n";
+      if (expectedChar === " ") return "·";  // makes indentation/new lines easier to follow
+      return "_";
+    }
+
+    function expectedDisplayChar(expectedChar) {
+      // what to display when showing actual expected code
+      // keep spaces as spaces, newline handled separately
+      if (expectedChar === " ") return "\u00A0"; // non-breaking space so it renders consistently
+      return expectedChar;
+    }
+
+    function render() {
+      codeEl.innerHTML = "";
+
+      for (let i = 0; i < ANSWER_CODE.length; i++) {
+        const expected = ANSWER_CODE[i];
+        const got = typed[i];
+
+        // newline => just a <br>
+        if (expected === "\n") {
+          codeEl.appendChild(document.createElement("br"));
+          continue;
+        }
+
+        const span = document.createElement("span");
+        span.classList.add("ch");
+
+        // Decide what character to show:
+        // - If correct => reveal actual expected char
+        // - If wrong => show "x"
+        // - If untyped => show "_" (or "·" for spaces), OR hint char if hintMode on
+        if (got == null) {
+          if (hintMode) {
+            span.classList.add("hintChar");
+            span.textContent = expectedDisplayChar(expected);
+          } else {
+            const m = maskedCharFor(expected);
+            span.textContent = (m === "·") ? "·" : m;
+          }
+        } else if (got === expected) {
+          span.classList.add("correct");
+          span.textContent = expectedDisplayChar(expected);
+        } else {
+          span.classList.add("wrong");
+          if (i === lastWrongIndex) span.classList.add("pulse");
+          span.textContent = "x";
+        }
+
+        codeEl.appendChild(span);
+      }
+
+      const total = ANSWER_CODE.length;
+      const correctCount = typed.reduce((acc, c, idx) => (c != null && c === ANSWER_CODE[idx]) ? acc + 1 : acc, 0);
+      statusEl.innerHTML = `
+        <span>Progress: <b style="color:#cfcfcf">${Math.min(cursorIndex, total)}</b> / ${total}</span>
+        <span>Correct: <b style="color:#cfcfcf">${correctCount}</b></span>
+        <span>Hint: <b style="color:#cfcfcf">${hintMode ? "ON" : "OFF"}</b></span>
+      `;
+    }
+
+    function reset() {
+      typed = [];
+      cursorIndex = 0;
+      hintMode = false;
+      lastWrongIndex = -1;
+      render();
+    }
+
+    function insertOneChar(c) {
+      if (cursorIndex >= ANSWER_CODE.length) return;
+
+      typed[cursorIndex] = c;
+
+      if (c !== ANSWER_CODE[cursorIndex]) lastWrongIndex = cursorIndex;
+      else lastWrongIndex = -1;
+
+      cursorIndex++;
+    }
+
+    function insertText(text) {
+      for (const c of text) {
+        insertOneChar(c);
+      }
+      render();
+    }
+
+    function backspace() {
+      if (cursorIndex <= 0) return;
+
+      cursorIndex--;
+      typed[cursorIndex] = undefined;
+      lastWrongIndex = -1;
+      render();
+    }
+
+    // Focus-on-click like a typing app
+    window.addEventListener("mousedown", () => codeEl.focus());
+
+    codeEl.addEventListener("keydown", (e) => {
+      // Reset shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "r") {
+        e.preventDefault();
+        reset();
+        return;
+      }
+
+      // Toggle hint (instead of inserting spaces)
+      if (e.key === "Tab") {
+        e.preventDefault();
+        hintMode = !hintMode;
+        lastWrongIndex = -1;
+        render();
+        return;
+      }
+
+      if (e.key === "Backspace") { e.preventDefault(); backspace(); return; }
+
+      // Enter should type a newline
+      if (e.key === "Enter") { e.preventDefault(); insertText("\n"); return; }
+
+      // Ignore non-character keys
+      if (e.key.length !== 1) return;
+
+      e.preventDefault();
+      insertText(e.key);
+    });
+
+    reset();
+    codeEl.focus();
+  </script>
+</body>
+</html>
