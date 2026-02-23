@@ -1,302 +1,1047 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Python Syntax Memorizer (Prototype)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FreshBite — Food App</title>
   <style>
     :root{
-      --bg: #1f1f1f;
+      --fb_color_bg_1: #0b0f14;
+      --fb_color_bg_2: #101723;
+      --fb_color_card: rgba(255,255,255,0.06);
+      --fb_color_card_2: rgba(255,255,255,0.08);
+      --fb_color_text: rgba(255,255,255,0.92);
+      --fb_color_muted: rgba(255,255,255,0.68);
+      --fb_color_muted2: rgba(255,255,255,0.52);
+      --fb_color_border: rgba(255,255,255,0.12);
+      --fb_color_accent: #7c5cff;
+      --fb_color_accent2: #19d3ff;
+      --fb_color_good: #26e08c;
+      --fb_color_bad: #ff4d6d;
 
-      /* default (masked) */
-      --mask: #7a7a7a;
+      --fb_shadow_soft: 0 12px 40px rgba(0,0,0,0.35);
+      --fb_radius_2xl: 22px;
+      --fb_radius_xl: 16px;
+      --fb_radius_l: 12px;
 
-      /* hint (shows the real code lightly) */
-      --hint: #9a9a9a;
-
-      /* correct */
-      --correct: #eaeaea;
-
-      /* wrong glow */
-      --wrongGlow1: rgba(255, 70, 70, 0.80);
-      --wrongGlow2: rgba(255, 70, 70, 0.55);
+      --fb_font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    html, body { height: 100%; }
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
     body{
-      margin:0;
-      background: var(--bg);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 0;
+      font-family: var(--fb_font);
+      background:
+        radial-gradient(900px 500px at 20% 0%, rgba(124,92,255,0.35), transparent 60%),
+        radial-gradient(900px 500px at 80% 15%, rgba(25,211,255,0.25), transparent 60%),
+        linear-gradient(180deg, var(--fb_color_bg_1), var(--fb_color_bg_2));
+      color: var(--fb_color_text);
     }
 
-    .wrap{
-      width:min(1100px, 92vw);
-      padding: 26px 18px;
+    a{ color: inherit; text-decoration: none; }
+
+    .fb_layout_root_mega_1{
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 18px;
+      padding: 18px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .question{
-      color:#d8d8d8;
-      font-size: 16px;
-      margin-bottom: 14px;
-      user-select:none;
+    .fb_panel_main_mega_1{
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--fb_color_border);
+      border-radius: var(--fb_radius_2xl);
+      box-shadow: var(--fb_shadow_soft);
+      overflow: hidden;
     }
 
-    .hintline{
-      color:#8a8a8a;
-      font-size: 13px;
-      margin-bottom: 12px;
-      user-select:none;
+    .fb_topbar_ultra_1{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--fb_color_border);
+      background: rgba(0,0,0,0.18);
+      backdrop-filter: blur(10px);
     }
 
-    .code{
-      font-size: 22px;
-      line-height: 1.65;
-      white-space: pre-wrap;
-      word-break: break-word;
+    .fb_brand_group_mega_1{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 180px;
+    }
+    .fb_brand_logo_blob_1{
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 30% 30%, var(--fb_color_accent2), var(--fb_color_accent));
+      box-shadow: 0 10px 26px rgba(124,92,255,0.35);
+    }
+    .fb_brand_title_stack_1{
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .fb_brand_title_stack_1 strong{ font-size: 14px; letter-spacing: 0.2px; }
+    .fb_brand_title_stack_1 span{ font-size: 12px; color: var(--fb_color_muted2); }
+
+    .fb_searchbar_wrap_ultra_1{
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      min-width: 240px;
+    }
+
+    .fb_search_input_giga_1{
+      width: min(520px, 100%);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid var(--fb_color_border);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+    }
+    .fb_search_input_giga_1 input{
+      flex: 1;
+      background: transparent;
+      border: none;
       outline: none;
-      user-select:none;
-      caret-color: transparent;
+      color: var(--fb_color_text);
+      font-size: 14px;
+    }
+    .fb_search_input_giga_1 input::placeholder{
+      color: rgba(255,255,255,0.45);
     }
 
-    /* each displayed character */
-    .ch{
-      color: var(--mask);
-      transition: color 140ms ease, text-shadow 140ms ease, filter 140ms ease;
-    }
-
-    /* hint (only for untyped positions) */
-    .hintChar{
-      color: var(--hint);
-      opacity: 0.55;
-    }
-
-    .correct{
-      color: var(--correct);
-      opacity: 1;
-      text-shadow: none;
-      filter: none;
-    }
-
-    .wrong{
-      color: #ffffff;
-      text-shadow:
-        0 0 4px var(--wrongGlow1),
-        0 0 12px var(--wrongGlow2);
-      filter: saturate(1.1);
-      opacity: 1;
-    }
-
-    @keyframes wrongPulse {
-      0%{
-        text-shadow:
-          0 0 3px rgba(255,70,70,0.40),
-          0 0 8px rgba(255,70,70,0.30);
-      }
-      50%{
-        text-shadow:
-          0 0 7px rgba(255,70,70,0.98),
-          0 0 20px rgba(255,70,70,0.78);
-      }
-      100%{
-        text-shadow:
-          0 0 4px rgba(255,70,70,0.80),
-          0 0 12px rgba(255,70,70,0.55);
-      }
-    }
-    .wrong.pulse{ animation: wrongPulse 240ms ease-in-out 1; }
-
-    .status{
-      margin-top: 14px;
-      color:#8a8a8a;
+    .fb_button_pill_mega_1{
+      border: 1px solid var(--fb_color_border);
+      background: rgba(255,255,255,0.06);
+      color: var(--fb_color_text);
+      border-radius: 999px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
       font-size: 13px;
-      user-select:none;
-      display:flex;
-      gap: 14px;
-      flex-wrap: wrap;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      user-select: none;
     }
-    kbd{
-      border:1px solid #555;
-      border-bottom-width:2px;
-      border-radius:6px;
-      padding:2px 6px;
-      color:#cfcfcf;
+    .fb_button_pill_mega_1:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .fb_button_pill_mega_1:active{
+      transform: translateY(0px) scale(0.99);
+    }
+    .fb_button_pill_accent_mega_1{
+      border: 1px solid rgba(124,92,255,0.45);
+      background: linear-gradient(135deg, rgba(124,92,255,0.35), rgba(25,211,255,0.22));
+    }
+
+    .fb_topbar_right_group_1{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 180px;
+      justify-content: flex-end;
+    }
+    .fb_badge_count_mega_1{
       font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--fb_color_border);
+      background: rgba(255,255,255,0.06);
+      color: var(--fb_color_muted);
+    }
+
+    .fb_hero_section_ultra_1{
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+    }
+
+    .fb_hero_card_left_mega_1{
+      border: 1px solid var(--fb_color_border);
+      background: linear-gradient(135deg, rgba(124,92,255,0.20), rgba(255,255,255,0.04));
+      border-radius: var(--fb_radius_2xl);
+      padding: 18px;
+      min-height: 180px;
+      position: relative;
+      overflow: hidden;
+    }
+    .fb_hero_card_left_mega_1:before{
+      content: "";
+      position: absolute;
+      inset: -40px -60px auto auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(25,211,255,0.40), rgba(124,92,255,0.15), transparent 70%);
+      filter: blur(0px);
+    }
+    .fb_hero_headline_mega_1{
+      font-size: 26px;
+      margin: 0 0 8px 0;
+      letter-spacing: 0.2px;
+    }
+    .fb_hero_subtext_mega_1{
+      margin: 0 0 14px 0;
+      color: var(--fb_color_muted);
+      max-width: 52ch;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .fb_hero_action_row_mega_1{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .fb_hero_note_mega_1{
+      margin-top: 10px;
+      color: var(--fb_color_muted2);
+      font-size: 12px;
+    }
+
+    .fb_hero_card_right_mega_1{
+      border: 1px solid var(--fb_color_border);
+      background: rgba(255,255,255,0.04);
+      border-radius: var(--fb_radius_2xl);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      min-height: 180px;
+    }
+
+    .fb_chip_row_ultra_1{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .fb_filter_chip_mega_1{
+      border: 1px solid var(--fb_color_border);
+      background: rgba(255,255,255,0.05);
+      padding: 8px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--fb_color_muted);
+      user-select: none;
+      transition: background .12s ease, transform .12s ease, border-color .12s ease;
+    }
+    .fb_filter_chip_mega_1:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.08); }
+    .fb_filter_chip_active_mega_1{
+      color: var(--fb_color_text);
+      border-color: rgba(124,92,255,0.5);
+      background: rgba(124,92,255,0.18);
+    }
+
+    .fb_section_title_mega_1{
+      padding: 0 16px 10px 16px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .fb_section_title_mega_1 h2{
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+    }
+    .fb_section_title_mega_1 span{
+      color: var(--fb_color_muted2);
+      font-size: 12px;
+    }
+
+    .fb_category_grid_ultra_1{
+      padding: 0 16px 16px 16px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .fb_category_card_mega_1{
+      border: 1px solid var(--fb_color_border);
+      background: rgba(255,255,255,0.04);
+      border-radius: var(--fb_radius_xl);
+      padding: 12px;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      min-height: 78px;
+      display: grid;
+      align-content: center;
+      gap: 6px;
+    }
+    .fb_category_card_mega_1:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .fb_category_card_mega_1 strong{ font-size: 13px; }
+    .fb_category_card_mega_1 small{ color: var(--fb_color_muted2); font-size: 12px; }
+    .fb_category_card_active_mega_1{
+      border-color: rgba(25,211,255,0.45);
+      background: rgba(25,211,255,0.10);
+    }
+
+    .fb_menu_grid_ultra_1{
+      padding: 0 16px 18px 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .fb_menu_card_ultra_1{
+      border: 1px solid var(--fb_color_border);
+      background: rgba(255,255,255,0.04);
+      border-radius: var(--fb_radius_2xl);
+      overflow: hidden;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+      display: grid;
+      grid-template-rows: 110px auto;
+    }
+
+    .fb_menu_card_media_mega_1{
+      background:
+        radial-gradient(120px 120px at 30% 30%, rgba(25,211,255,0.25), transparent 70%),
+        radial-gradient(140px 140px at 70% 40%, rgba(124,92,255,0.25), transparent 70%),
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.15));
+      border-bottom: 1px solid var(--fb_color_border);
+      position: relative;
+      padding: 12px;
+    }
+    .fb_menu_card_media_mega_1 .fb_media_tag_mega_1{
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--fb_color_border);
+      background: rgba(0,0,0,0.22);
+      color: var(--fb_color_muted);
+    }
+    .fb_menu_card_body_mega_1{
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .fb_menu_title_row_mega_1{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+    .fb_menu_title_row_mega_1 strong{ font-size: 14px; }
+    .fb_menu_title_row_mega_1 .fb_price_tag_mega_1{
+      font-size: 13px;
+      color: var(--fb_color_text);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--fb_color_border);
+      background: rgba(255,255,255,0.05);
+      white-space: nowrap;
+    }
+    .fb_menu_desc_mega_1{
+      margin: 0;
+      color: var(--fb_color_muted);
+      font-size: 13px;
+      line-height: 1.45;
+      min-height: 38px;
+    }
+
+    .fb_menu_meta_row_mega_1{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .fb_meta_pills_row_mega_1{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .fb_meta_pill_mega_1{
+      font-size: 11px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--fb_color_border);
+      background: rgba(255,255,255,0.04);
+      color: var(--fb_color_muted);
+    }
+
+    .fb_sidebar_cart_ultra_1{
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--fb_color_border);
+      border-radius: var(--fb_radius_2xl);
+      box-shadow: var(--fb_shadow_soft);
+      overflow: hidden;
+      position: sticky;
+      top: 18px;
+      height: calc(100vh - 36px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 520px;
+    }
+
+    .fb_cart_header_mega_1{
+      padding: 14px 14px 10px 14px;
+      border-bottom: 1px solid var(--fb_color_border);
+      background: rgba(0,0,0,0.18);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .fb_cart_header_mega_1 h3{
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: 0.2px;
+    }
+    .fb_cart_items_scroll_mega_1{
+      overflow: auto;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .fb_cart_item_card_mega_1{
+      border: 1px solid var(--fb_color_border);
+      background: rgba(255,255,255,0.04);
+      border-radius: var(--fb_radius_xl);
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .fb_cart_item_top_mega_1{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+    .fb_cart_item_top_mega_1 strong{ font-size: 13px; }
+    .fb_cart_item_top_mega_1 small{ color: var(--fb_color_muted2); display: block; margin-top: 2px; font-size: 12px; }
+    .fb_cart_item_cost_mega_1{
+      font-size: 12px;
+      color: var(--fb_color_muted);
+      white-space: nowrap;
+    }
+    .fb_qty_row_ultra_1{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .fb_qty_controls_mega_1{
+      display: inline-flex;
+      border: 1px solid var(--fb_color_border);
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.03);
+    }
+    .fb_qty_controls_mega_1 button{
+      border: none;
+      background: transparent;
+      color: var(--fb_color_text);
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .fb_qty_controls_mega_1 span{
+      padding: 6px 10px;
+      color: var(--fb_color_muted);
+      font-size: 12px;
+      border-left: 1px solid var(--fb_color_border);
+      border-right: 1px solid var(--fb_color_border);
+      min-width: 34px;
+      text-align: center;
+    }
+    .fb_remove_btn_mega_1{
+      border: 1px solid rgba(255,77,109,0.35);
+      background: rgba(255,77,109,0.12);
+      color: var(--fb_color_text);
+      padding: 7px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .fb_cart_footer_mega_1{
+      padding: 12px 14px 14px 14px;
+      border-top: 1px solid var(--fb_color_border);
+      display: grid;
+      gap: 10px;
+      background: rgba(0,0,0,0.12);
+    }
+    .fb_totals_row_ultra_1{
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--fb_color_muted);
+    }
+    .fb_totals_row_ultra_1 div{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .fb_totals_row_ultra_1 .fb_total_strong_mega_1{
+      color: var(--fb_color_text);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .fb_checkout_btn_ultra_1{
+      width: 100%;
+      justify-content: center;
+    }
+
+    .fb_empty_state_mega_1{
+      color: var(--fb_color_muted2);
+      border: 1px dashed rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.02);
+      border-radius: var(--fb_radius_xl);
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 1040px){
+      .fb_layout_root_mega_1{ grid-template-columns: 1fr; }
+      .fb_sidebar_cart_ultra_1{ position: relative; top: 0; height: auto; min-height: 420px; }
+    }
+    @media (max-width: 880px){
+      .fb_hero_section_ultra_1{ grid-template-columns: 1fr; }
+      .fb_category_grid_ultra_1{ grid-template-columns: repeat(2, 1fr); }
+      .fb_menu_grid_ultra_1{ grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px){
+      .fb_topbar_ultra_1{ flex-wrap: wrap; }
+      .fb_brand_group_mega_1, .fb_topbar_right_group_1{ min-width: unset; }
+      .fb_menu_grid_ultra_1{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div id="question" class="question"></div>
-    <div class="hintline">
-      Type the answer. <kbd>Tab</kbd> toggles hint (shows light-gray code). <kbd>Backspace</kbd> deletes. <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>R</kbd> resets.
-    </div>
-    <div id="code" class="code" tabindex="0" aria-label="Typing area"></div>
-    <div class="status" id="status"></div>
+  <div class="fb_layout_root_mega_1">
+    <!-- MAIN PANEL -->
+    <main class="fb_panel_main_mega_1">
+      <header class="fb_topbar_ultra_1">
+        <div class="fb_brand_group_mega_1">
+          <div class="fb_brand_logo_blob_1" aria-hidden="true"></div>
+          <div class="fb_brand_title_stack_1">
+            <strong>FreshBite</strong>
+            <span>Quick, clean, tasty</span>
+          </div>
+        </div>
+
+        <div class="fb_searchbar_wrap_ultra_1">
+          <div class="fb_search_input_giga_1" role="search">
+            <span aria-hidden="true">🔎</span>
+            <input id="fbSearchInput_ultra_1" placeholder="Search bowls, wraps, smoothies..." />
+          </div>
+          <button id="fbClearSearchBtn_ultra_1" class="fb_button_pill_mega_1" type="button">Clear</button>
+        </div>
+
+        <div class="fb_topbar_right_group_1">
+          <span id="fbLiveResultsBadge_mega_1" class="fb_badge_count_mega_1">0 items</span>
+          <button id="fbSurpriseBtn_ultra_1" class="fb_button_pill_mega_1 fb_button_pill_accent_mega_1" type="button">
+            ✨ Surprise me
+          </button>
+        </div>
+      </header>
+
+      <section class="fb_hero_section_ultra_1">
+        <div class="fb_hero_card_left_mega_1">
+          <h1 class="fb_hero_headline_mega_1">Order food without the chaos.</h1>
+          <p class="fb_hero_subtext_mega_1">
+            Browse a clean menu, filter by dietary needs, and build a cart in seconds.
+            This is a front-end demo you can expand into a real app.
+          </p>
+          <div class="fb_hero_action_row_mega_1">
+            <button id="fbScrollToMenuBtn_ultra_1" class="fb_button_pill_mega_1 fb_button_pill_accent_mega_1" type="button">Browse menu</button>
+            <button id="fbResetFiltersBtn_ultra_1" class="fb_button_pill_mega_1" type="button">Reset filters</button>
+          </div>
+          <div class="fb_hero_note_mega_1">Tip: try “veg” filter + search “wrap”.</div>
+        </div>
+
+        <div class="fb_hero_card_right_mega_1">
+          <div>
+            <div style="font-size:13px; margin-bottom:8px; color: rgba(255,255,255,0.82);">Dietary filters</div>
+            <div class="fb_chip_row_ultra_1">
+              <div class="fb_filter_chip_mega_1" data-filter="veg">🥬 Vegetarian</div>
+              <div class="fb_filter_chip_mega_1" data-filter="vegan">🌱 Vegan</div>
+              <div class="fb_filter_chip_mega_1" data-filter="gf">🚫🌾 Gluten-free</div>
+              <div class="fb_filter_chip_mega_1" data-filter="highProtein">💪 High protein</div>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:13px; margin-bottom:8px; color: rgba(255,255,255,0.82);">Sort</div>
+            <div class="fb_chip_row_ultra_1">
+              <div class="fb_filter_chip_mega_1" data-sort="popular">⭐ Popular</div>
+              <div class="fb_filter_chip_mega_1" data-sort="priceLow">⬇️ Price</div>
+              <div class="fb_filter_chip_mega_1" data-sort="priceHigh">⬆️ Price</div>
+            </div>
+          </div>
+
+          <div style="font-size:12px; color: rgba(255,255,255,0.55); line-height:1.4;">
+            Everything here is vanilla JS (no frameworks). Want a React version instead? Tell me.
+          </div>
+        </div>
+      </section>
+
+      <div class="fb_section_title_mega_1">
+        <h2>Categories</h2>
+        <span id="fbCategoryHintText_ultra_1">Tap one to filter the menu</span>
+      </div>
+
+      <section class="fb_category_grid_ultra_1" id="fbCategoryGrid_ultra_1">
+        <!-- Injected by JS -->
+      </section>
+
+      <div class="fb_section_title_mega_1" id="fbMenuAnchor_ultra_1">
+        <h2>Menu</h2>
+        <span id="fbMenuCountText_ultra_1">Showing 0</span>
+      </div>
+
+      <section class="fb_menu_grid_ultra_1" id="fbMenuGrid_ultra_1">
+        <!-- Injected by JS -->
+      </section>
+    </main>
+
+    <!-- CART SIDEBAR -->
+    <aside class="fb_sidebar_cart_ultra_1" aria-label="Cart sidebar">
+      <div class="fb_cart_header_mega_1">
+        <h3>Your cart</h3>
+        <button id="fbClearCartBtn_ultra_1" class="fb_button_pill_mega_1" type="button">Clear cart</button>
+      </div>
+
+      <div class="fb_cart_items_scroll_mega_1" id="fbCartItemsWrap_ultra_1">
+        <!-- Injected by JS -->
+      </div>
+
+      <div class="fb_cart_footer_mega_1">
+        <div class="fb_totals_row_ultra_1">
+          <div><span>Subtotal</span><span id="fbSubtotalText_ultra_1">$0.00</span></div>
+          <div><span>Delivery</span><span id="fbDeliveryText_ultra_1">$0.00</span></div>
+          <div><span>Tax</span><span id="fbTaxText_ultra_1">$0.00</span></div>
+          <div class="fb_total_strong_mega_1"><span>Total</span><span id="fbTotalText_ultra_1">$0.00</span></div>
+        </div>
+        <button id="fbCheckoutBtn_ultra_1" class="fb_button_pill_mega_1 fb_button_pill_accent_mega_1 fb_checkout_btn_ultra_1" type="button">
+          Checkout (demo)
+        </button>
+      </div>
+    </aside>
   </div>
 
   <script>
-    // ------------------ EDIT THESE TWO LINES ------------------
-    const QUESTION_TEXT = "Write a Python function that returns True if n is prime, else False.";
-    const ANSWER_CODE = `def is_prime(n: int) -> bool:
-    if n < 2:
-        return False
-    for i in range(2, int(n ** 0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
-`;
-    // ---------------------------------------------------------
+    /***********************
+     * DATA (demo catalog)
+     ***********************/
+    const fbMenuDataCatalog_ultra_1 = [
+      { id: "m1", name: "Paneer Power Bowl", price: 12.49, category: "Bowls", tags: ["veg", "highProtein"], desc: "Paneer, rice, crunchy veg, tangy sauce.", badge: "Top pick" },
+      { id: "m2", name: "Chickpea Veggie Wrap", price: 9.99, category: "Wraps", tags: ["vegan", "highProtein"], desc: "Roasted chickpeas, slaw, lemon tahini.", badge: "New" },
+      { id: "m3", name: "Greek Yogurt Parfait", price: 6.49, category: "Breakfast", tags: ["veg", "highProtein", "gf"], desc: "Yogurt, berries, honey, crunchy granola.", badge: "Fast" },
+      { id: "m4", name: "Tofu Teriyaki Bowl", price: 11.99, category: "Bowls", tags: ["vegan"], desc: "Teriyaki tofu, rice, broccoli, sesame.", badge: "Vegan" },
+      { id: "m5", name: "Gluten-Free Veggie Pizza", price: 13.99, category: "Pizza", tags: ["veg", "gf"], desc: "GF crust, peppers, olives, mozzarella.", badge: "GF" },
+      { id: "m6", name: "Mango Lassi Smoothie", price: 5.99, category: "Drinks", tags: ["veg", "gf"], desc: "Mango + yogurt blend, smooth & sweet.", badge: "Cold" },
+      { id: "m7", name: "Lentil Soup (Dal)", price: 7.49, category: "Soups", tags: ["vegan", "gf", "highProtein"], desc: "Comforting dal with warm spices.", badge: "Cozy" },
+      { id: "m8", name: "Avocado Crunch Salad", price: 10.49, category: "Salads", tags: ["vegan", "gf"], desc: "Avocado, greens, seeds, citrus dressing.", badge: "Fresh" },
+      { id: "m9", name: "Cheese & Veg Quesadilla", price: 8.99, category: "Wraps", tags: ["veg"], desc: "Cheesy fold with peppers + salsa.", badge: "Popular" },
+    ];
 
-    const questionEl = document.getElementById("question");
-    const codeEl = document.getElementById("code");
-    const statusEl = document.getElementById("status");
+    const fbCategoryDataList_ultra_1 = [
+      { key: "All", label: "All", hint: "Everything" },
+      { key: "Bowls", label: "Bowls", hint: "Warm + filling" },
+      { key: "Wraps", label: "Wraps", hint: "Grab & go" },
+      { key: "Salads", label: "Salads", hint: "Fresh & crisp" },
+      { key: "Soups", label: "Soups", hint: "Comfort" },
+      { key: "Pizza", label: "Pizza", hint: "Shareable" },
+      { key: "Breakfast", label: "Breakfast", hint: "Start strong" },
+      { key: "Drinks", label: "Drinks", hint: "Cold & smooth" },
+    ];
 
-    questionEl.textContent = "Question: " + QUESTION_TEXT;
+    /***********************
+     * STATE
+     ***********************/
+    const fbUiStateObject_ultra_1 = {
+      searchTextValue: "",
+      activeCategoryKey: "All",
+      activeDietaryFiltersSet: new Set(), // veg, vegan, gf, highProtein
+      sortModeKey: "popular", // popular | priceLow | priceHigh
+      cartLineItemsMap: new Map(), // id -> {item, qty}
+    };
 
-    // Typed characters array: each index stores what user typed, or undefined if not typed yet.
-    let typed = [];
-    let cursorIndex = 0;
-    let hintMode = false;      // toggled by Tab
-    let lastWrongIndex = -1;
+    /***********************
+     * DOM HELPERS
+     ***********************/
+    const fbDomById_ultra_1 = (id) => document.getElementById(id);
 
-    // Visual masking rules:
-    // - Newlines show as real line breaks.
-    // - Spaces show as "·" when masked (so you can SEE indentation), but the expected char is still " ".
-    // - Other characters show as "_" when masked.
-    function maskedCharFor(expectedChar) {
-      if (expectedChar === "\n") return "\n";
-      if (expectedChar === " ") return "·";  // makes indentation/new lines easier to follow
-      return "_";
-    }
+    const fbMoneyFormat_ultra_1 = (n) => {
+      const safeNum = Number.isFinite(n) ? n : 0;
+      return safeNum.toLocaleString(undefined, { style: "currency", currency: "USD" });
+    };
 
-    function expectedDisplayChar(expectedChar) {
-      // what to display when showing actual expected code
-      // keep spaces as spaces, newline handled separately
-      if (expectedChar === " ") return "\u00A0"; // non-breaking space so it renders consistently
-      return expectedChar;
-    }
+    const fbNormalizeText_ultra_1 = (t) => (t || "").toLowerCase().trim();
 
-    function render() {
-      codeEl.innerHTML = "";
-
-      for (let i = 0; i < ANSWER_CODE.length; i++) {
-        const expected = ANSWER_CODE[i];
-        const got = typed[i];
-
-        // newline => just a <br>
-        if (expected === "\n") {
-          codeEl.appendChild(document.createElement("br"));
-          continue;
-        }
-
-        const span = document.createElement("span");
-        span.classList.add("ch");
-
-        // Decide what character to show:
-        // - If correct => reveal actual expected char
-        // - If wrong => show "x"
-        // - If untyped => show "_" (or "·" for spaces), OR hint char if hintMode on
-        if (got == null) {
-          if (hintMode) {
-            span.classList.add("hintChar");
-            span.textContent = expectedDisplayChar(expected);
-          } else {
-            const m = maskedCharFor(expected);
-            span.textContent = (m === "·") ? "·" : m;
-          }
-        } else if (got === expected) {
-          span.classList.add("correct");
-          span.textContent = expectedDisplayChar(expected);
-        } else {
-          span.classList.add("wrong");
-          if (i === lastWrongIndex) span.classList.add("pulse");
-          span.textContent = "x";
-        }
-
-        codeEl.appendChild(span);
+    /***********************
+     * FILTER + SORT LOGIC
+     ***********************/
+    function fbDoesItemMatchDietaryFilters_ultra_1(item, filtersSet){
+      if (!filtersSet || filtersSet.size === 0) return true;
+      // Must satisfy ALL selected filters
+      for (const f of filtersSet){
+        if (!item.tags.includes(f)) return false;
       }
-
-      const total = ANSWER_CODE.length;
-      const correctCount = typed.reduce((acc, c, idx) => (c != null && c === ANSWER_CODE[idx]) ? acc + 1 : acc, 0);
-      statusEl.innerHTML = `
-        <span>Progress: <b style="color:#cfcfcf">${Math.min(cursorIndex, total)}</b> / ${total}</span>
-        <span>Correct: <b style="color:#cfcfcf">${correctCount}</b></span>
-        <span>Hint: <b style="color:#cfcfcf">${hintMode ? "ON" : "OFF"}</b></span>
-      `;
+      return true;
     }
 
-    function reset() {
-      typed = [];
-      cursorIndex = 0;
-      hintMode = false;
-      lastWrongIndex = -1;
-      render();
+    function fbDoesItemMatchSearch_ultra_1(item, searchText){
+      const q = fbNormalizeText_ultra_1(searchText);
+      if (!q) return true;
+      const hay = fbNormalizeText_ultra_1(item.name + " " + item.desc + " " + item.category + " " + item.tags.join(" "));
+      return hay.includes(q);
     }
 
-    function insertOneChar(c) {
-      if (cursorIndex >= ANSWER_CODE.length) return;
-
-      typed[cursorIndex] = c;
-
-      if (c !== ANSWER_CODE[cursorIndex]) lastWrongIndex = cursorIndex;
-      else lastWrongIndex = -1;
-
-      cursorIndex++;
+    function fbDoesItemMatchCategory_ultra_1(item, categoryKey){
+      if (!categoryKey || categoryKey === "All") return true;
+      return item.category === categoryKey;
     }
 
-    function insertText(text) {
-      for (const c of text) {
-        insertOneChar(c);
+    function fbSortMenuItems_ultra_1(items, sortKey){
+      const cloned = [...items];
+      if (sortKey === "priceLow") return cloned.sort((a,b) => a.price - b.price);
+      if (sortKey === "priceHigh") return cloned.sort((a,b) => b.price - a.price);
+      // "popular" default: keep original order
+      return cloned;
+    }
+
+    function fbGetVisibleMenuItems_ultra_1(){
+      const filtered = fbMenuDataCatalog_ultra_1.filter((item) =>
+        fbDoesItemMatchCategory_ultra_1(item, fbUiStateObject_ultra_1.activeCategoryKey) &&
+        fbDoesItemMatchDietaryFilters_ultra_1(item, fbUiStateObject_ultra_1.activeDietaryFiltersSet) &&
+        fbDoesItemMatchSearch_ultra_1(item, fbUiStateObject_ultra_1.searchTextValue)
+      );
+      return fbSortMenuItems_ultra_1(filtered, fbUiStateObject_ultra_1.sortModeKey);
+    }
+
+    /***********************
+     * CART LOGIC
+     ***********************/
+    function fbAddItemToCart_ultra_1(itemId){
+      const item = fbMenuDataCatalog_ultra_1.find(x => x.id === itemId);
+      if (!item) return;
+
+      const existing = fbUiStateObject_ultra_1.cartLineItemsMap.get(itemId);
+      const nextQty = existing ? existing.qty + 1 : 1;
+      fbUiStateObject_ultra_1.cartLineItemsMap.set(itemId, { item, qty: nextQty });
+      fbRenderCart_ultra_1();
+      fbRenderTopBadgeCounts_ultra_1();
+    }
+
+    function fbUpdateCartQuantity_ultra_1(itemId, delta){
+      const existing = fbUiStateObject_ultra_1.cartLineItemsMap.get(itemId);
+      if (!existing) return;
+
+      const nextQty = existing.qty + delta;
+      if (nextQty <= 0){
+        fbUiStateObject_ultra_1.cartLineItemsMap.delete(itemId);
+      } else {
+        fbUiStateObject_ultra_1.cartLineItemsMap.set(itemId, { item: existing.item, qty: nextQty });
       }
-      render();
+      fbRenderCart_ultra_1();
+      fbRenderTopBadgeCounts_ultra_1();
     }
 
-    function backspace() {
-      if (cursorIndex <= 0) return;
-
-      cursorIndex--;
-      typed[cursorIndex] = undefined;
-      lastWrongIndex = -1;
-      render();
+    function fbRemoveCartLine_ultra_1(itemId){
+      fbUiStateObject_ultra_1.cartLineItemsMap.delete(itemId);
+      fbRenderCart_ultra_1();
+      fbRenderTopBadgeCounts_ultra_1();
     }
 
-    // Focus-on-click like a typing app
-    window.addEventListener("mousedown", () => codeEl.focus());
+    function fbClearCartNow_ultra_1(){
+      fbUiStateObject_ultra_1.cartLineItemsMap.clear();
+      fbRenderCart_ultra_1();
+      fbRenderTopBadgeCounts_ultra_1();
+    }
 
-    codeEl.addEventListener("keydown", (e) => {
-      // Reset shortcut
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "r") {
-        e.preventDefault();
-        reset();
+    function fbComputeCartTotals_ultra_1(){
+      let subtotal = 0;
+      for (const { item, qty } of fbUiStateObject_ultra_1.cartLineItemsMap.values()){
+        subtotal += item.price * qty;
+      }
+      const delivery = subtotal > 0 ? 2.99 : 0;
+      const tax = subtotal > 0 ? subtotal * 0.05 : 0; // demo tax
+      const total = subtotal + delivery + tax;
+      return { subtotal, delivery, tax, total };
+    }
+
+    /***********************
+     * RENDER: CATEGORIES
+     ***********************/
+    function fbRenderCategoryCards_ultra_1(){
+      const grid = fbDomById_ultra_1("fbCategoryGrid_ultra_1");
+      grid.innerHTML = "";
+
+      fbCategoryDataList_ultra_1.forEach(cat => {
+        const card = document.createElement("div");
+        card.className = "fb_category_card_mega_1" + (fbUiStateObject_ultra_1.activeCategoryKey === cat.key ? " fb_category_card_active_mega_1" : "");
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.innerHTML = `<strong>${cat.label}</strong><small>${cat.hint}</small>`;
+
+        const onActivate = () => {
+          fbUiStateObject_ultra_1.activeCategoryKey = cat.key;
+          fbRenderCategoryCards_ultra_1();
+          fbRenderMenuCards_ultra_1();
+        };
+
+        card.addEventListener("click", onActivate);
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") onActivate();
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    /***********************
+     * RENDER: MENU
+     ***********************/
+    function fbRenderMenuCards_ultra_1(){
+      const menuWrap = fbDomById_ultra_1("fbMenuGrid_ultra_1");
+      const items = fbGetVisibleMenuItems_ultra_1();
+
+      fbDomById_ultra_1("fbMenuCountText_ultra_1").textContent = `Showing ${items.length}`;
+
+      menuWrap.innerHTML = "";
+      if (items.length === 0){
+        menuWrap.innerHTML = `
+          <div class="fb_empty_state_mega_1" style="grid-column: 1 / -1;">
+            No items match your filters. Try clearing search or resetting filters.
+          </div>
+        `;
+        fbRenderTopBadgeCounts_ultra_1();
         return;
       }
 
-      // Toggle hint (instead of inserting spaces)
-      if (e.key === "Tab") {
-        e.preventDefault();
-        hintMode = !hintMode;
-        lastWrongIndex = -1;
-        render();
-        return;
+      items.forEach(item => {
+        const card = document.createElement("article");
+        card.className = "fb_menu_card_ultra_1";
+        const tagText = item.badge || item.category;
+
+        const pills = item.tags.map(t => {
+          const label = (t === "gf") ? "Gluten-free" :
+                        (t === "highProtein") ? "High protein" :
+                        (t === "veg") ? "Vegetarian" :
+                        (t === "vegan") ? "Vegan" : t;
+          return `<span class="fb_meta_pill_mega_1">${label}</span>`;
+        }).join("");
+
+        card.innerHTML = `
+          <div class="fb_menu_card_media_mega_1">
+            <div class="fb_media_tag_mega_1">${tagText}</div>
+          </div>
+          <div class="fb_menu_card_body_mega_1">
+            <div class="fb_menu_title_row_mega_1">
+              <strong>${item.name}</strong>
+              <div class="fb_price_tag_mega_1">${fbMoneyFormat_ultra_1(item.price)}</div>
+            </div>
+            <p class="fb_menu_desc_mega_1">${item.desc}</p>
+
+            <div class="fb_menu_meta_row_mega_1">
+              <div class="fb_meta_pills_row_mega_1">${pills}</div>
+              <button class="fb_button_pill_mega_1 fb_button_pill_accent_mega_1" type="button" data-add="${item.id}">
+                ➕ Add
+              </button>
+            </div>
+          </div>
+        `;
+
+        menuWrap.appendChild(card);
+      });
+
+      // Wire add buttons
+      menuWrap.querySelectorAll("[data-add]").forEach(btn => {
+        btn.addEventListener("click", () => fbAddItemToCart_ultra_1(btn.getAttribute("data-add")));
+      });
+
+      fbRenderTopBadgeCounts_ultra_1();
+    }
+
+    /***********************
+     * RENDER: CART
+     ***********************/
+    function fbRenderCart_ultra_1(){
+      const wrap = fbDomById_ultra_1("fbCartItemsWrap_ultra_1");
+      wrap.innerHTML = "";
+
+      const entries = Array.from(fbUiStateObject_ultra_1.cartLineItemsMap.values());
+      if (entries.length === 0){
+        wrap.innerHTML = `
+          <div class="fb_empty_state_mega_1">
+            Your cart is empty. Add items from the menu to see totals here.
+          </div>
+        `;
+      } else {
+        entries.forEach(({ item, qty }) => {
+          const row = document.createElement("div");
+          row.className = "fb_cart_item_card_mega_1";
+          row.innerHTML = `
+            <div class="fb_cart_item_top_mega_1">
+              <div>
+                <strong>${item.name}</strong>
+                <small>${item.category}</small>
+              </div>
+              <div class="fb_cart_item_cost_mega_1">${fbMoneyFormat_ultra_1(item.price * qty)}</div>
+            </div>
+            <div class="fb_qty_row_ultra_1">
+              <div class="fb_qty_controls_mega_1" aria-label="Quantity controls">
+                <button type="button" data-dec="${item.id}">−</button>
+                <span>${qty}</span>
+                <button type="button" data-inc="${item.id}">+</button>
+              </div>
+              <button type="button" class="fb_remove_btn_mega_1" data-rm="${item.id}">Remove</button>
+            </div>
+          `;
+          wrap.appendChild(row);
+        });
+
+        wrap.querySelectorAll("[data-inc]").forEach(b => b.addEventListener("click", () => fbUpdateCartQuantity_ultra_1(b.getAttribute("data-inc"), +1)));
+        wrap.querySelectorAll("[data-dec]").forEach(b => b.addEventListener("click", () => fbUpdateCartQuantity_ultra_1(b.getAttribute("data-dec"), -1)));
+        wrap.querySelectorAll("[data-rm]").forEach(b => b.addEventListener("click", () => fbRemoveCartLine_ultra_1(b.getAttribute("data-rm"))));
       }
 
-      if (e.key === "Backspace") { e.preventDefault(); backspace(); return; }
+      const totals = fbComputeCartTotals_ultra_1();
+      fbDomById_ultra_1("fbSubtotalText_ultra_1").textContent = fbMoneyFormat_ultra_1(totals.subtotal);
+      fbDomById_ultra_1("fbDeliveryText_ultra_1").textContent = fbMoneyFormat_ultra_1(totals.delivery);
+      fbDomById_ultra_1("fbTaxText_ultra_1").textContent = fbMoneyFormat_ultra_1(totals.tax);
+      fbDomById_ultra_1("fbTotalText_ultra_1").textContent = fbMoneyFormat_ultra_1(totals.total);
+    }
 
-      // Enter should type a newline
-      if (e.key === "Enter") { e.preventDefault(); insertText("\n"); return; }
+    function fbRenderTopBadgeCounts_ultra_1(){
+      const visibleCount = fbGetVisibleMenuItems_ultra_1().length;
+      const cartCount = Array.from(fbUiStateObject_ultra_1.cartLineItemsMap.values()).reduce((acc, x) => acc + x.qty, 0);
+      fbDomById_ultra_1("fbLiveResultsBadge_mega_1").textContent = `${visibleCount} items • ${cartCount} in cart`;
+    }
 
-      // Ignore non-character keys
-      if (e.key.length !== 1) return;
+    /***********************
+     * FILTER CHIP WIRING
+     ***********************/
+    function fbSetChipActiveState_ultra_1(chipEl, isActive){
+      chipEl.classList.toggle("fb_filter_chip_active_mega_1", !!isActive);
+    }
 
-      e.preventDefault();
-      insertText(e.key);
-    });
+    function fbWireDietaryAndSortChips_ultra_1(){
+      document.querySelectorAll(".fb_filter_chip_mega_1").forEach(chip => {
+        const diet = chip.getAttribute("data-filter");
+        const sort = chip.getAttribute("data-sort");
 
-    reset();
-    codeEl.focus();
+        if (diet){
+          const isActive = fbUiStateObject_ultra_1.activeDietaryFiltersSet.has(diet);
+          fbSetChipActiveState_ultra_1(chip, isActive);
+
+          chip.addEventListener("click", () => {
+            if (fbUiStateObject_ultra_1.activeDietaryFiltersSet.has(diet)){
+              fbUiStateObject_ultra_1.activeDietaryFiltersSet.delete(diet);
+            } else {
+              fbUiStateObject_ultra_1.activeDietaryFiltersSet.add(diet);
+            }
+            fbWireDietaryAndSortChips_ultra_1(); // refresh chip states
+            fbRenderMenuCards_ultra_1();
+          });
+        }
+
+        if (sort){
+          const isActive = fbUiStateObject_ultra_1.sortModeKey === sort;
+          fbSetChipActiveState_ultra_1(chip, isActive);
+
+          chip.addEventListener("click", () => {
+            fbUiStateObject_ultra_1.sortModeKey = sort;
+            // Make only one sort chip active:
+            document.querySelectorAll(".fb_filter_chip_mega_1[data-sort]").forEach(s => fbSetChipActiveState_ultra_1(s, s.getAttribute("data-sort") === sort));
+            fbRenderMenuCards_ultra_1();
+          });
+        }
+      });
+    }
+
+    /***********************
+     * TOPBAR + BUTTONS
+     ***********************/
+    function fbWireTopbarInputs_ultra_1(){
+      const search = fbDomById_ultra_1("fbSearchInput_ultra_1");
+
+      search.addEventListener("input", () => {
+        fbUiStateObject_ultra_1.searchTextValue = search.value;
+        fbRenderMenuCards_ultra_1();
+      });
+
+      fbDomById_ultra_1("fbClearSearchBtn_ultra_1").addEventListener("click", () => {
+        search.value = "";
+        fbUiStateObject_ultra_1.searchTextValue = "";
+        fbRenderMenuCards_ultra_1();
+      });
+
+      fbDomById_ultra_1("fbClearCartBtn_ultra_1").addEventListener("click", () => fbClearCartNow_ultra_1());
+
+      fbDomById_ultra_1("fbResetFiltersBtn_ultra_1").addEventListener("click", () => {
+        fbUiStateObject_ultra_1.activeDietaryFiltersSet.clear();
+        fbUiStateObject_ultra_1.activeCategoryKey = "All";
+        fbUiStateObject_ultra_1.sortModeKey = "popular";
+        fbWireDietaryAndSortChips_ultra_1();
+        fbRenderCategoryCards_ultra_1();
+        fbRenderMenuCards_ultra_1();
+      });
+
+      fbDomById_ultra_1("fbScrollToMenuBtn_ultra_1").addEventListener("click", () => {
+        fbDomById_ultra_1("fbMenuAnchor_ultra_1").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      fbDomById_ultra_1("fbSurpriseBtn_ultra_1").addEventListener("click", () => {
+        const visible = fbGetVisibleMenuItems_ultra_1();
+        if (visible.length === 0) return;
+        const pick = visible[Math.floor(Math.random() * visible.length)];
+        fbAddItemToCart_ultra_1(pick.id);
+      });
+
+      fbDomById_ultra_1("fbCheckoutBtn_ultra_1").addEventListener("click", () => {
+        const totals = fbComputeCartTotals_ultra_1();
+        if (totals.total <= 0){
+          alert("Cart is empty — add something first 🙂");
+          return;
+        }
+        alert("Checkout is a demo. Next step: hook this up to a backend + payments!");
+      });
+    }
+
+    /***********************
+     * INIT
+     ***********************/
+    function fbInitializeFoodAppPage_ultra_1(){
+      fbRenderCategoryCards_ultra_1();
+      fbWireTopbarInputs_ultra_1();
+      fbWireDietaryAndSortChips_ultra_1();
+      fbRenderMenuCards_ultra_1();
+      fbRenderCart_ultra_1();
+      fbRenderTopBadgeCounts_ultra_1();
+    }
+
+    fbInitializeFoodAppPage_ultra_1();
   </script>
 </body>
 </html>
